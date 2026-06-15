@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 
 export default function ExportButton() {
@@ -20,22 +20,6 @@ export default function ExportButton() {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
-        onclone: (clonedDoc) => {
-          // First pass: set inline computed styles on all elements
-          const all = clonedDoc.querySelectorAll("*");
-          all.forEach((el) => {
-            const htmlEl = el as HTMLElement;
-            const cs = clonedDoc.defaultView!.getComputedStyle(htmlEl);
-            const color = cs.color;
-            const bg = cs.backgroundColor;
-            const bd = cs.borderColor;
-            if (color && color !== "rgba(0, 0, 0, 0)") htmlEl.style.color = color;
-            if (bg && bg !== "rgba(0, 0, 0, 0)") htmlEl.style.backgroundColor = bg;
-            if (bd && bd !== "rgba(0, 0, 0, 0)") htmlEl.style.borderColor = bd;
-          });
-          // Second pass: remove ALL stylesheets to avoid lab() parsing
-          clonedDoc.querySelectorAll("style, link[rel=stylesheet]").forEach((s) => s.remove());
-        },
       });
 
       const pdf = new jsPDF("p", "mm", "a4");
