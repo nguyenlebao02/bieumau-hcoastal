@@ -1,33 +1,56 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useState } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
-const BlobProvider = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.BlobProvider),
-  { ssr: false }
-);
-
-const PdfDocument = dynamic(() => import("./PdfDocument"), { ssr: false });
-
-export default function ExportButton({ form }: { form: any }) {
+export default function ExportButton() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDownload = async () => {
+  const handleExport = async () => {
+    const formEl = document.getElementById("print-form");
+    if (!formEl) return;
+
     setLoading(true);
     setError(null);
+
     try {
-      const { pdf } = await import("@react-pdf/renderer");
-      const blob = await pdf(<PdfDocument form={form} />).toBlob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "Phieu-dat-cho-Coastal-QN.pdf";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const canvas = await html2canvas(formEl, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        onclone: (clonedDoc) => {
+          // Fix Tailwind v4 lab()/oklch() colors for html2canvas
+          clonedDoc.querySelectorAll("*").forEach((el) => {
+            const htmlEl = el as HTMLElement;
+            const style = window.getComputedStyle(htmlEl);
+            if (style.color && style.color !== "rgba(0, 0, 0, 0)") htmlEl.style.color = style.color;
+            const bg = style.backgroundColor;
+            if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") htmlEl.style.backgroundColor = bg;
+          });
+        },
+      });
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let y = 0;
+
+      while (y < imgHeight) {
+        if (y > 0) pdf.addPage();
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = canvas.width;
+        const sliceHeight = Math.min(canvas.height - y * (canvas.width / imgWidth), (pageHeight * canvas.width) / imgWidth);
+        pageCanvas.height = sliceHeight;
+        const ctx = pageCanvas.getContext("2d")!;
+        ctx.drawImage(canvas, 0, -y * (canvas.width / imgWidth));
+        pdf.addImage(pageCanvas.toDataURL("image/png"), "PNG", 0, 0, imgWidth, (sliceHeight * imgWidth) / canvas.width);
+        y += (pageHeight * canvas.width) / imgWidth;
+      }
+
+      pdf.save("Phieu-dat-cho-Coastal-QN.pdf");
     } catch (err: any) {
       setError(err?.message || "Lỗi khi tạo PDF");
     } finally {
@@ -37,7 +60,7 @@ export default function ExportButton({ form }: { form: any }) {
 
   return (
     <button
-      onClick={handleDownload}
+      onClick={handleExport}
       disabled={loading}
       className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
     >

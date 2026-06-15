@@ -40,11 +40,11 @@ export default function Home() {
           <h1 className="text-lg font-bold text-gray-800">Phiếu đăng ký đặt mua - Coastal Quảng Ngãi</h1>
           <div className="flex gap-2">
             <button onClick={() => setForm(emptyForm)} className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 transition cursor-pointer">Xóa form</button>
-            <ExportButton form={form} />
+            <ExportButton />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-8" style={{ fontFamily: "Times New Roman, serif" }}>
+        <div id="print-form" className="bg-white rounded-xl shadow-lg p-8" style={{ fontFamily: "Times New Roman, serif" }}>
           <div className="text-center mb-6">
             <h2 className="text-lg font-bold uppercase tracking-wide">Phiếu đăng ký đặt mua biệt thự/nhà ở tại</h2>
             <h2 className="text-xl font-bold uppercase mt-1">Dự án Coastal Quảng Ngãi</h2>
