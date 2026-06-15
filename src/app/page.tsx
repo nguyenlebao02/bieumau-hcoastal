@@ -3,12 +3,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 
-const PDFDownloadLink = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
-  { ssr: false }
-);
-
-const PdfDocument = dynamic(() => import("./PdfDocument"), { ssr: false });
+const ExportButton = dynamic(() => import("./ExportButton"), { ssr: false });
 
 interface FormData {
   csbhDate: string; tenNhaKetNoi: string; tenKhachHang: string;
@@ -45,16 +40,7 @@ export default function Home() {
           <h1 className="text-lg font-bold text-gray-800">Phiếu đăng ký đặt mua - Coastal Quảng Ngãi</h1>
           <div className="flex gap-2">
             <button onClick={() => setForm(emptyForm)} className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 transition cursor-pointer">Xóa form</button>
-            <PDFDownloadLink
-              document={<PdfDocument form={form} />}
-              fileName="Phieu-dat-cho-Coastal-QN.pdf"
-              className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer inline-block"
-            >
-              {({ loading, error }) => {
-                if (error) return "❌ Lỗi";
-                return loading ? "⏳ Đang tạo PDF..." : "📄 Xuất PDF";
-              }}
-            </PDFDownloadLink>
+            <ExportButton form={form} />
           </div>
         </div>
 
