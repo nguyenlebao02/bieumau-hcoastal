@@ -21,14 +21,20 @@ export default function ExportButton() {
         useCORS: true,
         backgroundColor: "#ffffff",
         onclone: (clonedDoc) => {
-          // Fix Tailwind v4 lab()/oklch() colors for html2canvas
-          clonedDoc.querySelectorAll("*").forEach((el) => {
+          // First pass: set inline computed styles on all elements
+          const all = clonedDoc.querySelectorAll("*");
+          all.forEach((el) => {
             const htmlEl = el as HTMLElement;
-            const style = window.getComputedStyle(htmlEl);
-            if (style.color && style.color !== "rgba(0, 0, 0, 0)") htmlEl.style.color = style.color;
-            const bg = style.backgroundColor;
-            if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") htmlEl.style.backgroundColor = bg;
+            const cs = clonedDoc.defaultView!.getComputedStyle(htmlEl);
+            const color = cs.color;
+            const bg = cs.backgroundColor;
+            const bd = cs.borderColor;
+            if (color && color !== "rgba(0, 0, 0, 0)") htmlEl.style.color = color;
+            if (bg && bg !== "rgba(0, 0, 0, 0)") htmlEl.style.backgroundColor = bg;
+            if (bd && bd !== "rgba(0, 0, 0, 0)") htmlEl.style.borderColor = bd;
           });
+          // Second pass: remove ALL stylesheets to avoid lab() parsing
+          clonedDoc.querySelectorAll("style, link[rel=stylesheet]").forEach((s) => s.remove());
         },
       });
 
@@ -40,13 +46,12 @@ export default function ExportButton() {
 
       while (y < imgHeight) {
         if (y > 0) pdf.addPage();
-        const pageCanvas = document.createElement("canvas");
-        pageCanvas.width = canvas.width;
-        const sliceHeight = Math.min(canvas.height - y * (canvas.width / imgWidth), (pageHeight * canvas.width) / imgWidth);
-        pageCanvas.height = sliceHeight;
-        const ctx = pageCanvas.getContext("2d")!;
-        ctx.drawImage(canvas, 0, -y * (canvas.width / imgWidth));
-        pdf.addImage(pageCanvas.toDataURL("image/png"), "PNG", 0, 0, imgWidth, (sliceHeight * imgWidth) / canvas.width);
+        const sliceH = Math.min(canvas.height - y * (canvas.width / imgWidth), (pageHeight * canvas.width) / imgWidth);
+        const pc = document.createElement("canvas");
+        pc.width = canvas.width;
+        pc.height = sliceH;
+        pc.getContext("2d")!.drawImage(canvas, 0, -y * (canvas.width / imgWidth));
+        pdf.addImage(pc.toDataURL("image/png"), "PNG", 0, 0, imgWidth, (sliceH * imgWidth) / canvas.width);
         y += (pageHeight * canvas.width) / imgWidth;
       }
 
