@@ -1,6 +1,4 @@
-[providers]
-node = {}
-python = {}
+providers = ["node", "python"]
 
 [phases.install]
-cmds = ["pip install python-docx"]
+cmds = ["pip3 install python-docx"]
