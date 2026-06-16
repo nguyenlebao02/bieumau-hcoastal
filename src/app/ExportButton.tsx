@@ -7,34 +7,28 @@ import jsPDF from "jspdf";
 function collectFormData(): Record<string, string> {
   const formEl = document.getElementById("print-form");
   if (!formEl) return {};
-  const inputs = formEl.querySelectorAll("input, select");
-  const data: Record<string, string> = {};
+  
+  const allInputs = Array.from(formEl.querySelectorAll("input, select")) as (HTMLInputElement | HTMLSelectElement)[];
   const fields = [
-    "csbhDate", "tenNhaKetNoi", "tenKhachHang", "giayToSo", "ngayCap", "noiCap",
-    "diaChiHoKhau", "diaChiLienHe", "soDienThoai", "email",
-    "maCan", "khuBietThu", "huong", "mauNha", "dienTichDat", "tongDienTichXayDung",
-    "tongGiaXayDung", "chietKhau", "tongGiaBan", "vvnhLaiSuat", "quaTang",
-    "chuKyNhay", "chuKyChinh", "ngayKy", "thangKy",
+    "csbhDate", "tenNhaKetNoi",          // index 0,1
+    "tenKhachHang", "giayToSo",           // index 2,3
+    "ngayCap", "noiCap",                  // index 4,5 (same row)
+    "diaChiHoKhau", "diaChiLienHe",      // index 6,7
+    "soDienThoai", "email",              // index 8,9 (same row)
+    "maCan", "khuBietThu",               // index 10,11 (same row)
+    "huong", "mauNha",                    // index 12,13 (same row)
+    "dienTichDat", "tongDienTichXayDung",// index 14,15 (same row)
+    "tongGiaXayDung", "chietKhau",       // index 16,17 (same row)
+    "tongGiaBan",                         // index 18
+    "vvnhLaiSuat",                        // index 19 (select)
+    "quaTang",                            // index 20 (input in table)
+    "chuKyNhay", "chuKyChinh",            // index 21,22
+    "ngayKy", "thangKy",                  // index 23,24
   ];
-  const values: string[] = [];
-  inputs.forEach((el) => {
-    if (el instanceof HTMLInputElement) values.push(el.value);
-    else if (el instanceof HTMLSelectElement) values.push(el.value);
-  });
-  // Skip first 2 inputs (CSBH + tenNhaKetNoi are inside print-form)
-  // Map collect inputs in order they appear
-  let vi = 0;
-  const allInputs = Array.from(inputs).filter(
-    (el) => el instanceof HTMLInputElement || el instanceof HTMLSelectElement
-  );
-  // The first 2 are csbhDate, tenNhaKetNoi
-  for (let i = 0; i < Math.min(fields.length, 2); i++) {
-    if (allInputs[i]) data[fields[i]] = (allInputs[i] as HTMLInputElement | HTMLSelectElement).value;
-  }
-  // Then section 1 inputs (8 fields) start from index 2 in the form, but there are also 2 section inputs at same level
-  // Easier: read by index directly from all input-like elements
-  for (let i = 0; i < allInputs.length && i < fields.length; i++) {
-    data[fields[i]] = (allInputs[i] as HTMLInputElement | HTMLSelectElement).value;
+  
+  const data: Record<string, string> = {};
+  for (let i = 0; i < fields.length && i < allInputs.length; i++) {
+    data[fields[i]] = allInputs[i].value;
   }
   return data;
 }
@@ -101,18 +95,10 @@ export default function ExportButton() {
 
   return (
     <div className="flex gap-2">
-      <button
-        onClick={handleExportPdf}
-        disabled={loading}
-        className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
-      >
+      <button onClick={handleExportPdf} disabled={loading} className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer">
         {loading ? "⏳ PDF..." : "📄 Xuất PDF"}
       </button>
-      <button
-        onClick={handleExportWord}
-        disabled={loadingWord}
-        className="px-4 py-2 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 transition disabled:opacity-50 cursor-pointer"
-      >
+      <button onClick={handleExportWord} disabled={loadingWord} className="px-4 py-2 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 transition disabled:opacity-50 cursor-pointer">
         {loadingWord ? "⏳ Word..." : "📝 Xuất Word"}
       </button>
       {error && <span className="text-xs text-red-500 self-center">❌ {error}</span>}
