@@ -1,0 +1,6 @@
+[providers]
+node = {}
+python = {}
+
+[phases.install]
+cmds = ["pip install python-docx"]
