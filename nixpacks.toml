@@ -1,4 +1,0 @@
-providers = ["node", "python"]
-
-[phases.install]
-cmds = ["pip3 install python-docx"]

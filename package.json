@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.5.1",
+    "adm-zip": "^0.5.17",
     "docx": "^9.7.1",
     "file-saver": "^2.0.5",
     "html2canvas-pro": "^1.6.7",
